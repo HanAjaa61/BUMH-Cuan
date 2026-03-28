@@ -24,7 +24,7 @@
         <div class="win-rules">
           <div class="rule-item">💰 Kumpulkan Rp 100.000</div>
           <div class="rule-item">📚 Jawab semua 10 soal bisnis</div>
-          <div class="rule-item">⏱ Waktu 10 menit (+2 menit tiap jawaban benar)</div>
+          <div class="rule-item">⏱ Waktu 7 menit (+30 detik tiap jawaban benar)</div>
         </div>
 
         <button class="btn btn--start" @click="handleStart">
@@ -106,7 +106,7 @@
               />
               <path
                 class="timer-fill"
-                :stroke-dasharray="`${Math.min(100, (state.timeLeft / 600) * 100)}, 100`"
+                :stroke-dasharray="`${Math.min(100, (state.timeLeft / 420) * 100)}, 100`"
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
               />
             </svg>
@@ -181,7 +181,7 @@
         <!-- Quiz Column -->
         <section class="quiz-col">
           <h3 class="panel-title">📚 SOAL BISNIS</h3>
-          <p class="quiz-subtitle">Jawab benar = +2 menit bonus waktu! ⏱</p>
+          <p class="quiz-subtitle">Jawab benar = +30 detik bonus waktu! ⏱</p>
 
           <div class="questions-list">
             <div
@@ -224,7 +224,7 @@
                   class="btn btn--submit"
                   :class="{ 'btn--loading': q.isLoading }"
                   :disabled="q.isLoading || !q.userAnswer.trim()"
-                  @click="submitAnswer(q.id)"
+                  @click="handleSubmitAnswer(q.id)"
                 >
                   {{ q.isLoading ? '⏳ Menilai...' : '📤 Kirim Jawaban' }}
                 </button>
@@ -349,11 +349,33 @@ function handleStart() {
   }, 50)
 }
 
+// ─── Upgrade + SFX ───
 function handleBuyUpgrade() {
   buyUpgrade()
   setTimeout(() => {
-    gameScene?.updateIncomeDisplay(state.incomePerClick)
+    if (gameScene) {
+      gameScene.updateIncomeDisplay(state.incomePerClick)
+      gameScene.playUpgradeSFX()
+    }
   }, 50)
+}
+
+// ─── Submit jawaban + SFX ───
+async function handleSubmitAnswer(questionId) {
+  const qBefore = state.questions.find(q => q.id === questionId)
+  const statusBefore = qBefore?.status
+
+  await submitAnswer(questionId)
+
+  setTimeout(() => {
+    if (!gameScene) return
+    const qAfter = state.questions.find(q => q.id === questionId)
+    if (qAfter?.status === 'answered' && statusBefore !== 'answered') {
+      gameScene.playCorrectSFX()
+    } else if (qAfter?.feedback?.type === 'wrong') {
+      gameScene.playWrongSFX()
+    }
+  }, 150)
 }
 
 watch(() => state.isWin, (val) => {

@@ -58,7 +58,7 @@ const QUESTIONS = [
 ]
 
 // ─────────────────────────────────────────
-// Upgrade tiers — mulai dari 1000 (income awal 500)
+// Upgrade tiers
 // ─────────────────────────────────────────
 const UPGRADE_TIERS = [
   { label: 'Pemula',        incomePerClick: 500,   price: 0,      description: 'Klik biasa' },
@@ -69,8 +69,8 @@ const UPGRADE_TIERS = [
   { label: 'BUMH Investor', incomePerClick: 25000, price: 130000, description: '+25000/klik' },
 ]
 
-const INITIAL_TIME = 600 // 10 menit dalam detik
-const BONUS_TIME_PER_CORRECT = 120 // +2 menit per jawaban benar
+const INITIAL_TIME = 420          // 7 menit dalam detik
+const BONUS_TIME_PER_CORRECT = 30 // +30 detik per jawaban benar
 
 // ─────────────────────────────────────────
 // Reactive state
@@ -199,8 +199,8 @@ async function submitAnswer(questionId) {
 
     if (result === 'BENAR') {
       q.status = 'answered'
-      q.feedback = { type: 'correct', message: `✅ BENAR! Soal selesai! +2 menit bonus waktu! ⏱` }
-      // +2 menit bonus waktu
+      q.feedback = { type: 'correct', message: `✅ BENAR! Soal selesai! +30 detik bonus waktu! ⏱` }
+      // +30 detik bonus waktu
       state.timeLeft = Math.min(state.timeLeft + BONUS_TIME_PER_CORRECT, 3600)
       checkWin()
     } else {
